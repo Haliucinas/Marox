@@ -2,7 +2,9 @@
 # TODO: find "smart" way to load src folder recursively
 
 SOURCES = src/start.o \
-			src/main.o
+			src/main.o \
+			src/include/common.o \
+			src/include/screen.o
 
 CFLAGS = -nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -m32
 LDFLAGS = -TLink.ld -melf_i386
