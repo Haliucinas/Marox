@@ -18,18 +18,13 @@ void outb(const u16int, const u8int);
 u8int inb(const u16int);
 // Read a word --/--.
 u16int inw(const u16int);
-
-/*
-		TODO: IMPLEMENT THESE
-*/
-
 // Copy len bytes from src to dest.
-void memcpy(u8int*, const u8int*, u32int);
+void* memcpy(void*, const void*, u32int);
 // Write len copies of val into dest.
-void memset(u8int*, u8int, u32int);
+void* memset(void*, const u8int, u32int);
 // Compare two strings. Should return -1 if 
 // str1 < str2, 0 if they are equal or 1 otherwise.
-int strcmp(char*, char*);
+int strcmp(const char*, const char*);
 // Copy the NULL-terminated string src into dest, and
 // return dest.
 char* strcpy(char*, const char*);

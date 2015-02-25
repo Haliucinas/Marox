@@ -78,7 +78,7 @@ void screenPut(const char chr) {
 	} else if (chr == 0xD) { 
 		// Handle carriage return
 		cursorX = 0;
-	} else if(chr >= ' ') {
+	} else if(chr >= 0x20) {
 		// Handle any other printable character.
 		location = videoMem + (cursorY*80 + cursorX);
 		*location = colorAttrib << 8 | chr;
