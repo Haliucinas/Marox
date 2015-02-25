@@ -1,6 +1,6 @@
 // screen.c -- Defines functions for writing to the monitor.
 
-#include "screen.h"
+#include "console.h"
 
 // The VGA framebuffer starts at 0xB8000.
 u16int* videoMem = (u16int*)0xB8000;
@@ -47,7 +47,7 @@ static void scroll() {
 }
 
 // Clears the screen, by copying lots of spaces to the framebuffer.
-void screenClear() {
+void consoleClear() {
 	u16int blank = 0x20 /* space */ | (bwAttrib << 8);
 
 	for (int i = 0; i < 80*25; ++i) {
@@ -61,7 +61,7 @@ void screenClear() {
 }
 
 // Writes a single character out to the screen.
-void screenPut(const char chr) {
+void consolePut(const char chr) {
 	u16int* location;
 
 	// Handle a backspace, by moving the cursor back one space
@@ -98,38 +98,38 @@ void screenPut(const char chr) {
 	moveCursor();
 }
 
-void screenWrite(const char* str) {
+void consoleWrite(const char* str) {
 	while (*str) {
-		screenPut(*(str));
+		consolePut(*(str));
 		++str;
 	}
 }
 
-void screenWriteHex(const u32int num) {
+void consoleWriteHex(const u32int num) {
 	if (num) {
-		screenWriteHex(num / 0x10);
+		consoleWriteHex(num / 0x10);
 		u32int tmp = num % 0x10;
 		if (tmp > 0x9) {
-			screenPut(tmp + 0x57);
+			consolePut(tmp + 0x57);
 		} else {
-			screenPut(tmp + 0x30);
+			consolePut(tmp + 0x30);
 		}
 	} else {
-		screenWrite("0x");
+		consoleWrite("0x");
 	}
 }
 
-void screenWriteDec(const u32int num) {
+void consoleWriteDec(const u32int num) {
 	if (num) {
-		screenWriteDec(num / 10);
-		screenPut((num % 10) + 0x30);
+		consoleWriteDec(num / 10);
+		consolePut((num % 10) + 0x30);
 	}
 }
 
-void screenColorText(const u8int col) {
+void consoleColorText(const u8int col) {
 	colorAttrib = (colorAttrib & 0xF0) | col & 0x0F;
 }
 
-void screenColorBG(const u8int col) {
+void consoleColorBG(const u8int col) {
 	colorAttrib = col << 4 | (colorAttrib & 0x0F);
 }

@@ -1,12 +1,13 @@
 # The C and C++ rules are already setup by default.
 # TODO: find "smart" way to load src folder recursively
 
-SOURCES = src/start.o \
-			src/main.o \
-			src/include/common.o \
-			src/include/screen.o
+SOURCES += $(patsubst %.s, %.o, $(wildcard src/*.s))
+SOURCES += $(patsubst %.c, %.o, $(wildcard src/*.c))
+SOURCES += $(patsubst %.c, %.o, $(wildcard src/include/*.c))
+SOURCES += $(patsubst %.c, %.o, $(wildcard src/lib/*.c))
 
 CFLAGS = -nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -m32
+CFLAGS += -I. -I./include -I./lib
 LDFLAGS = -TLink.ld -melf_i386
 ASFLAGS = -felf
 
@@ -19,4 +20,5 @@ link:
 	yasm $(ASFLAGS) $< -o $@
 
 clean:
-	-rm src/*.o kernel
+	find . -name '*.o' | xargs rm -f
+	rm -f kernel

@@ -1,4 +1,4 @@
-// screen.h -- Defines the interface for screen.c
+// console.h -- Defines the interface for console.c
 
 #ifndef SCREEN_H
 #define SCREEN_H
@@ -22,23 +22,23 @@
 #define LIGHT_BROWN 0xE
 #define WHITE 0xF
 
-// Clear the screen to all black.
-void screenClear();
+// Clear the console to all black.
+void consoleClear();
 
-// Write a single character out to the screen.
-void screenPut(const char);
+// Write a single character out to the console.
+void consolePut(const char);
 
 // Output a null-terminated ASCII string to the monitor.
-void screenWrite(const char*);
+void consoleWrite(const char*);
 
-void screenWriteHex(const u32int);
+void consoleWriteHex(const u32int);
 
-void screenWriteDec(const u32int);
+void consoleWriteDec(const u32int);
 
 // Set text color
-void screenColorText(const u8int);
+void consoleColorText(const u8int);
 
 // Set background color
-void screenColorBG(const u8int);
+void consoleColorBG(const u8int);
 
 #endif // SCREEN_H
