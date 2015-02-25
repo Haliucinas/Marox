@@ -5,7 +5,7 @@ SOURCES += $(patsubst %.c, %.o, $(wildcard src/*.c))
 SOURCES += $(patsubst %.c, %.o, $(wildcard src/include/*.c))
 SOURCES += $(patsubst %.c, %.o, $(wildcard src/lib/*.c))
 
-CFLAGS = -nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -m32 -O2
+CFLAGS = -nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -m32
 CFLAGS += -I. -I./include -I./lib
 LDFLAGS = -TLink.ld -melf_i386
 ASFLAGS = -felf

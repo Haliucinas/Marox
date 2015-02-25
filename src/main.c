@@ -5,7 +5,7 @@
 
 struct multiboot; // to avoid compiler warning. We don't need it now
 int kmain(struct multiboot* mboot) {
-	
+
 	// All our initialisation calls will go in here.
 	initDescTables();
 
@@ -21,6 +21,9 @@ int kmain(struct multiboot* mboot) {
 		consoleColorText(WHITE);
 		printf("%s", end);
 	}
+
+	__asm__ __volatile__("int $0x3");
+	__asm__ __volatile__("int $0x4");
 
 	return 0xdeadbeef;
 }
