@@ -1,5 +1,4 @@
 # The C and C++ rules are already setup by default.
-# TODO: find "smart" way to load src folder recursively
 
 SOURCES += $(patsubst %.s, %.o, $(wildcard src/*.s))
 SOURCES += $(patsubst %.c, %.o, $(wildcard src/*.c))

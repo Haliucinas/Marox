@@ -105,27 +105,6 @@ void consoleWrite(const char* str) {
 	}
 }
 
-void consoleWriteHex(const u32int num) {
-	if (num) {
-		consoleWriteHex(num / 0x10);
-		u32int tmp = num % 0x10;
-		if (tmp > 0x9) {
-			consolePut(tmp + 0x57);
-		} else {
-			consolePut(tmp + 0x30);
-		}
-	} else {
-		consoleWrite("0x");
-	}
-}
-
-void consoleWriteDec(const u32int num) {
-	if (num) {
-		consoleWriteDec(num / 10);
-		consolePut((num % 10) + 0x30);
-	}
-}
-
 void consoleColorText(const u8int col) {
 	colorAttrib = (colorAttrib & 0xF0) | col & 0x0F;
 }

@@ -1,7 +1,7 @@
 // console.h -- Defines the interface for console.c
 
-#ifndef SCREEN_H
-#define SCREEN_H
+#ifndef CONSOLE_H
+#define CONSOLE_H
 
 #include "common.h"
 
@@ -31,14 +31,10 @@ void consolePut(const char);
 // Output a null-terminated ASCII string to the monitor.
 void consoleWrite(const char*);
 
-void consoleWriteHex(const u32int);
-
-void consoleWriteDec(const u32int);
-
 // Set text color
 void consoleColorText(const u8int);
 
 // Set background color
 void consoleColorBG(const u8int);
 
-#endif // SCREEN_H
+#endif // CONSOLE_H

@@ -1,6 +1,7 @@
 // main.c -- Defines the C-code kernel entry point, calls initialisation routines.
 
 #include "include/console.h"
+#include "lib/printf.h"
 
 struct multiboot; // to avoid compiler warning. We don't need it now
 int kmain(struct multiboot* mboot) {
@@ -11,11 +12,11 @@ int kmain(struct multiboot* mboot) {
 
 	consoleClear();
 	for (int i = 1; i < 15; ++i) {
-		consoleWrite(welcome);
+		printf("%s", welcome);
 		consoleColorText(i);
-		consoleWrite(os);
+		printf("%s", os);
 		consoleColorText(WHITE);
-		consoleWrite(end);
+		printf("%s", end);
 	}
 
 	return 0xdeadbeef;
