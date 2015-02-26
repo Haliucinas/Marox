@@ -8,7 +8,9 @@ u32int tick = 0;
 
 static void timerCallback(registers regs) {
 	++tick;
-	printf("Tick: %d\n", tick);
+	if (tick % 180 == 0) {
+		printf("Tick: %d\n", tick);
+	}
 }
 
 void initTimer(u32int frequency) {
