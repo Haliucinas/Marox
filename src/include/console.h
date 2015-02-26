@@ -31,6 +31,8 @@ void consolePut(const char);
 // Output a null-terminated ASCII string to the monitor.
 void consoleWrite(const char*);
 
+void consoleWriteAt(const char*, const u8int, const u8int);
+
 // Set text color
 void consoleColorText(const u8int);
 

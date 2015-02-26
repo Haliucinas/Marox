@@ -105,3 +105,16 @@ int printf(const s8int *fmt, ...) {
 	consoleWrite(buffer);
 	return ret;
 };
+
+int printfAt(const u8int x, const u8int y, const s8int* fmt, ...) {
+	s8int buffer[128];
+	va_list args;
+	s32int ret;
+
+	va_start(args, fmt);
+	ret = vsprintf(buffer, fmt, args);
+	va_end(args);
+
+	consoleWriteAt(buffer, x, y);
+	return ret;
+};

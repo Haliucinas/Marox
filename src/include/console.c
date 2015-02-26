@@ -8,11 +8,13 @@ u16int* videoMem = (u16int*)0xB8000;
 // Color attribute 4 bits text | 4 bits background
 u8int colorAttrib = (BLACK << 4) | (WHITE & 0x0F);
 // Default black and white color attribute
-u8int bwAttrib = (BLACK << 4) | (WHITE & 0x0F);
+const u8int bwAttrib = (BLACK << 4) | (WHITE & 0x0F);
+const u16int blank = 0x20 /* space */ | (((BLACK << 4) | (WHITE & 0x0F)) << 8);
+const u16int panel = 0x20 /* space */ | (((DARK_GRAY << 4) | (WHITE & 0x0F)) << 8);
 
 // Stores the cursor position.
 u8int cursorX = 0;
-u8int cursorY = 0;
+u8int cursorY = 1;
 
 // Updates the hardware cursor.
 static void moveCursor() {
@@ -26,42 +28,43 @@ static void moveCursor() {
 
 // Scrolls the text on the screen up by one line.
 static void scroll() {
-	u16int blank = 0x20 /* space */ | (bwAttrib << 8);
-
 	// Row 25 is the end, this means we need to scroll up
-	if(cursorY >= 25) {
+	if(cursorY >= 24) {
 		// Move the current text chunk that makes up the screen
 		// back in the buffer by a line
-		for (int i = 0; i < 24*80; ++i) {
+		for (int i = 1; i < 23*80; ++i) {
 			videoMem[i] = videoMem[i+80];
 		}
 
 		// The last line should now be blank. Do this by writing
 		// 80 spaces to it.
-		for (int i = 24*80; i < 25*80; ++i) {
+		for (int i = 23*80; i < 24*80; ++i) {
 			videoMem[i] = blank;
 		}
 		// The cursor should now be on the last line.
-		cursorY = 24;
+		cursorY = 23;
 	}
 }
 
 // Clears the screen, by copying lots of spaces to the framebuffer.
-void consoleClear() {
-	u16int blank = 0x20 /* space */ | (bwAttrib << 8);
-
-	for (int i = 0; i < 80*25; ++i) {
+void consoleClear() { 
+	for (int i = 0; i < 80; ++i) {
+		videoMem[i] = panel;
+	}
+	for (int i = 80; i < 24*80; ++i) {
 		videoMem[i] = blank;
+	}
+	for (int i = 24*80; i < 25*80; ++i) {
+		videoMem[i] = panel;
 	}
 
 	// Move the hardware cursor back to the start.
 	cursorX = 0;
-	cursorY = 0;
+	cursorY = 1;
 	moveCursor();
 }
 
-// Writes a single character out to the screen.
-void consolePut(const char chr) {
+static void consolePutInner(const char chr) {
 	u16int* location;
 
 	// Handle a backspace, by moving the cursor back one space
@@ -91,6 +94,12 @@ void consolePut(const char chr) {
 		cursorX = 0;
 		++cursorY;
 	}
+}
+
+// Writes a single character out to the screen.
+void consolePut(const char chr) {
+
+	consolePutInner(chr);
 
 	// Scroll the screen if needed.
 	scroll();
@@ -103,6 +112,20 @@ void consoleWrite(const char* str) {
 		consolePut(*(str));
 		++str;
 	}
+}
+
+void consoleWriteAt(const char* str, const u8int curX, const u8int curY) {
+	u8int tmpX = cursorX;
+	u8int tmpY = cursorY;
+	cursorX = curX;
+	cursorY = curY;
+	while (*str) {
+		consolePutInner(*(str));
+		++str;
+	}
+	cursorX = tmpX;
+	cursorY = tmpY;
+	moveCursor();
 }
 
 void consoleColorText(const u8int col) {

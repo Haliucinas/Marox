@@ -11,4 +11,6 @@ int sprintf(char *str, const char *format, ...);
 
 int printf(const s8int*, ...);
 
+int printfAt(const u8int, const u8int, const s8int*, ...);
+
 #endif // PRINTF_H
