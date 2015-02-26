@@ -2,6 +2,7 @@
 
 #include "include/descTables.h"
 #include "lib/printf.h"
+#include "lib/drivers/pit.h"
 
 struct multiboot; // to avoid compiler warning. We don't need it now
 int kmain(struct multiboot* mboot) {
@@ -22,8 +23,8 @@ int kmain(struct multiboot* mboot) {
 		printf("%s", end);
 	}
 
-	__asm__ __volatile__("int $0x3");
-	__asm__ __volatile__("int $0x4");
+	__asm__ __volatile__("sti");
+	initTimer(50);
 
 	return 0xdeadbeef;
 }

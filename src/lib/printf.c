@@ -103,6 +103,5 @@ int printf(const s8int *fmt, ...) {
 	va_end(args);
 
 	consoleWrite(buffer);
-	consoleColorText(WHITE);
 	return ret;
 };

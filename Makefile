@@ -4,6 +4,7 @@ SOURCES += $(patsubst %.s, %.o, $(wildcard src/*.s))
 SOURCES += $(patsubst %.c, %.o, $(wildcard src/*.c))
 SOURCES += $(patsubst %.c, %.o, $(wildcard src/include/*.c))
 SOURCES += $(patsubst %.c, %.o, $(wildcard src/lib/*.c))
+SOURCES += $(patsubst %.c, %.o, $(wildcard src/lib/drivers/*.c))
 
 CFLAGS = -nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -m32
 CFLAGS += -I. -I./include -I./lib
