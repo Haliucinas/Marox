@@ -33,7 +33,7 @@ u32int kNewP(const u32int, u32int*);
 	Allocate a chunk of memory, sz in size. The physical address 
 	is returned in phys. It must be page-aligned.
 */
-u32int kNewAp(const u32int, u32int*);
+u32int kNewAP(const u32int, u32int*);
 
 /*
 	General allocation function.

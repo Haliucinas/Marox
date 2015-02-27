@@ -5,6 +5,7 @@
 #include "lib/drivers/pit.h"
 #include "lib/drivers/keyboard.h"
 #include "lib/drivers/rtc.h"
+#include "include/paging.h"
 
 #define OS_NAME "Marox OS"
 
@@ -27,6 +28,7 @@ int kmain(struct multiboot* mboot) {
 
 	// All our initialisation calls will go in here.
 	initDescTables();
+	initPaging();
 
 	consoleClear();
 	sayHello();
@@ -35,6 +37,9 @@ int kmain(struct multiboot* mboot) {
 	initKeyboard(); // Init keyboard
 	initClock(); // Init CMOS clock
 	initTimer(50); // Init timer to 50Hz
+
+	u32int *ptr = (u32int*)0xA0000000;
+	u32int do_page_fault = *ptr;
 
 	return 0xdeadbeef;
 }

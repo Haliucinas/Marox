@@ -1,6 +1,7 @@
 // common.c -- Defines some global functions.
 
 #include "common.h"
+#include "../lib/printf.h"
 
 void outb(const u16int port, const u8int value) {
 	__asm__ __volatile__("outb %1, %0" : : "dN" (port), "a" (value));
@@ -61,4 +62,22 @@ char* strcat(char* dst, const char* src) {
 		++dst, ++src;
 	}
 	return ret;
+}
+
+extern void panic(const char* message, const char* file, u32int line) {
+	// We encountered a massive problem and have to stop.
+	__asm__ __volatile__("cli"); // Disable interrupts.
+
+	printf("PANIC(%s) at %s:%d\n",message, file, line);
+	// Halt by going into an infinite loop.
+	for(;;);
+}
+
+extern void panicAssert(const char* file, u32int line, const char* desc) {
+	// An assertion failed, and we have to panic.
+	__asm__ __volatile__("cli"); // Disable interrupts.
+
+	printf("ASSERTION-FAILED(%s) at %s:%d\n", desc,file,line);
+	// Halt by going into an infinite loop.
+	for(;;);
 }

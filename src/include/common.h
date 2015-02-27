@@ -3,6 +3,9 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#define PANIC(msg) panic(msg, __FILE__, __LINE__);
+#define ASSERT(b) ((b) ? (void)0 : panic_assert(__FILE__, __LINE__, #b))
+
 // Some nice typedefs, to standardise sizes across platforms.
 // These typedefs are written for 32-bit X86.
 typedef unsigned int u32int;
@@ -31,5 +34,8 @@ char* strcpy(char*, const char*);
 // Concatenate the NULL-terminated string src onto
 // the end of dest, and return dest.
 char* strcat(char*, const char*);
+
+extern void panic(const char*, const char*, u32int);
+extern void panicAssert(const char*, u32int, const char*);
 
 #endif // COMMON_H
