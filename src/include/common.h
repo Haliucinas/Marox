@@ -4,7 +4,7 @@
 #define COMMON_H
 
 #define PANIC(msg) panic(msg, __FILE__, __LINE__);
-#define ASSERT(b) ((b) ? (void)0 : panic_assert(__FILE__, __LINE__, #b))
+#define ASSERT(b) ((b) ? (void)0 : panicAssert(__FILE__, __LINE__, #b))
 
 // Some nice typedefs, to standardise sizes across platforms.
 // These typedefs are written for 32-bit X86.

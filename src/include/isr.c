@@ -1,5 +1,6 @@
 // isr.c -- High level interrupt service routines and interrupt request handlers.
 
+#include "common.h"
 #include "isr.h"
 #include "../lib/printf.h"
 
@@ -19,8 +20,8 @@ void isrHandler(registers regs) {
 		isr handler = interruptHandlers[intNo];
 		handler(regs);
 	} else {
-		printf("Unhandled interrupt: no. %x code %x\n", regs.intNo, regs.errCode);
-		for(;;);
+		printf("Unhandled interrupt: no. %x\n", regs.intNo);
+		PANIC("Unhandled interrupt");
     }
 }
 
