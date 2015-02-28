@@ -7,6 +7,7 @@
 #include "lib/drivers/rtc.h"
 #include "include/paging.h"
 #include "lib/kheap.h"
+#include "include/multiboot.h"
 
 #define OS_NAME "Marox OS"
 
@@ -24,7 +25,6 @@ void sayHello() {
 
 }
 
-struct multiboot; // to avoid compiler warning. We don't need it now
 int kmain(struct multiboot* mboot) {
 
 	// All our initialisation calls will go in here.
