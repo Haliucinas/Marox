@@ -32,7 +32,7 @@ static void scroll() {
 	if(cursorY >= 24) {
 		// Move the current text chunk that makes up the screen
 		// back in the buffer by a line
-		for (int i = 1; i < 23*80; ++i) {
+		for (int i = 80; i < 23*80; ++i) {
 			videoMem[i] = videoMem[i+80];
 		}
 
