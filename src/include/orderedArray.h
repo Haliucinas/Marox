@@ -1,5 +1,5 @@
 // orderedArray.h -- Interface for creating, inserting and deleting
-//                    from ordered arrays.
+//                   from ordered arrays.
 
 #ifndef ORDERED_ARRAY_H
 #define ORDERED_ARRAY_H
@@ -11,47 +11,49 @@
 	It can store anything that can be cast to a void* -- so a u32int, or any pointer.
 */
 typedef void* typeT;
+
 /*
 	A predicate should return nonzero if the first argument is less than the second. Else 
 	it should return zero.
 */
-typedef s8int (*lessthanPredicateT)(const typeT, const typeT);
+typedef s8int (*lessThanPredicateT)(typeT,typeT);
+
 typedef struct {
-	typeT* array;
-	u32int size;
-	u32int maxSize;
-	lessthanPredicateT lessThan;
+    typeT* array;
+    u32int size;
+    u32int maxSize;
+    lessThanPredicateT lessThan;
 } orderedArrayT;
 
 /*
 	A standard less than predicate.
 */
-s8int standardLessthanPredicate(const typeT a, const typeT b);
+s8int standardLessThanPredicate(typeT, typeT);
 
 /*
 	Create an ordered array.
 */
-orderedArrayT createOrderedArray(const u32int, const lessthanPredicateT);
-orderedArrayT placeOrderedArray(const void*, const u32int, const lessthanPredicateT);
+orderedArrayT createOrderedArray(u32int, lessThanPredicateT);
+orderedArrayT placeOrderedArray(void*, u32int, lessThanPredicateT);
 
 /*
 	Destroy an ordered array.
 */
-void destroyOrderedArray(orderedArrayT* array);
+void destroyOrderedArray(orderedArrayT*);
 
 /*
 	Add an item into the array.
 */
-void insertOrderedArray(const typeT item, orderedArrayT* array);
+void insertOrderedArray(typeT, orderedArrayT*);
 
 /*
-   Lookup the item at index i.
+	Lookup the item at index i.
 */
-typeT lookupOrderedArray(const u32int i, const orderedArrayT* array);
+typeT lookupOrderedArray(u32int, orderedArrayT*);
 
 /*
 	Deletes the item at location i from the array.
 */
-void removeOrderedArray(u32int i, orderedArrayT* array);
+void removeOrderedArray(u32int, orderedArrayT*);
 
 #endif // ORDERED_ARRAY_H
