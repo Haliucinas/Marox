@@ -47,14 +47,14 @@ void clockCallback() {
 		consoleColorBG(DARK_GRAY);
 		u32int size = 5+intNum(clock.century)+intNum(clock.year)+intNum(clock.month)+intNum(clock.dayOfMonth)+intNum(clock.hours)+intNum(clock.minutes)+intNum(clock.seconds);
 
-		printfAt(80-size, 24, "%d%d-%d-%d %d:%d:%d",
+		/*printfAt(80-size, 24, "%d%d-%d-%d %d:%d:%d",
 			clock.century,
 			clock.year,
 			clock.month,
 			clock.dayOfMonth,
 			clock.hours,
 			clock.minutes,
-			clock.seconds);
+			clock.seconds);*/
 		consoleColorBG(BLACK);
 		ticks = 0;
 	}

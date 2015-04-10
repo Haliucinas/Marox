@@ -1,120 +1,161 @@
 #include "printf.h"
 
-static u8int* writeHex(u8int* str, u32int n) {
-	u32int digit;
-	u32int nDigits = 2 * sizeof(u32int);
+#define PAD_RIGHT 1
+#define PAD_ZERO 2
+/* the following should be enough for 32 bit int */
+#define PRINT_BUF_LEN 12
 
-	*str++ = '0';
-	*str++ = 'x';
-
-	for (int i = nDigits - 1; i >= 0; --i) {
-		digit = ((n >> 4 * i) & 0xF);
-		*str++ = digit < 10 ? digit + 0x30 : digit + 0x57;
-	}
-
-	return str;
+static void printchar(char** str, int c) {
+	if (str) {
+		**str = c;
+		++(*str);
+	} else consolePut(c);
 }
 
-static u8int* writeDec(s8int *str, s32int n) {
-	s8int buffer[12];
-	memset(buffer, 0, sizeof(buffer));
+static int prints(char** out, const char* string, int width, int pad) {
+	register int pc = 0, padchar = ' ';
 
-	if (n < 0) {
-		buffer[0] = '-';
-		n = -n;
+	if (width > 0) {
+		register int len = 0;
+		register const char* ptr;
+		for (ptr = string; *ptr; ++ptr) ++len;
+		if (len >= width) width = 0;
+		else width -= len;
+		if (pad & PAD_ZERO) padchar = '0';
+	}
+	if (!(pad & PAD_RIGHT)) {
+		for ( ; width > 0; --width) {
+			printchar (out, padchar);
+			++pc;
+		}
+	}
+	for ( ; *string ; ++string) {
+		printchar (out, *string);
+		++pc;
+	}
+	for ( ; width > 0; --width) {
+		printchar (out, padchar);
+		++pc;
 	}
 
-	buffer[11] = '0';
-
-	for (int i = 11; n; --i, n /= 10) {
-		buffer[i] = (n % 10) + 0x30;
-	}
-
-	for (int i = 0; i < 12; ++i) {
-		if (buffer[i]) *str++ = buffer[i];
-	}
-
-	return str;
+	return pc;
 }
 
-static s8int* handleFormatChar(s8int* str, s8int fmt, va_list* args) {
-	switch (fmt) {
-		case '%': // in case we want to print %
-			*str++ = '%';
-		case 's': { // string handler
-			const s8int* s = va_arg(*args, const s8int*);
-			while (*s) {
-				*str = *s;
-				++str, ++s;
+static int printi(char** out, int i, int b, int sg, int width, int pad, int letbase) {
+	char printBuf[PRINT_BUF_LEN];
+	register char* s;
+	register int t, neg = 0, pc = 0;
+	register unsigned int u = i;
+
+	if (i == 0) {
+		printBuf[0] = '0';
+		printBuf[1] = '\0';
+		return prints(out, printBuf, width, pad);
+	}
+
+	if (sg && b == 10 && i < 0) {
+		neg = 1;
+		u = -i;
+	}
+
+	s = printBuf + PRINT_BUF_LEN-1;
+	*s = '\0';
+
+	while (u) {
+		t = u % b;
+		if( t >= 10 )
+			t += letbase - '0' - 10;
+		*--s = t + '0';
+		u /= b;
+	}
+
+	if (neg) {
+		if( width && (pad & PAD_ZERO) ) {
+			printchar(out, '-');
+			++pc;
+			--width;
+		} else {
+			*--s = '-';
+		}
+	}
+
+	return pc + prints(out, s, width, pad);
+}
+
+static int print(char** out, const char* format, va_list args) {
+	register int width, pad;
+	register int pc = 0;
+	char scr[2];
+
+	for (; *format != 0; ++format) {
+		if (*format == '%') {
+			++format;
+			width = pad = 0;
+			if (*format == '\0') break;
+			if (*format == '%') goto out;
+			if (*format == '-') {
+				++format;
+				pad = PAD_RIGHT;
 			}
-			break;
+			while (*format == '0') {
+				++format;
+				pad |= PAD_ZERO;
+			}
+			for ( ; *format >= '0' && *format <= '9'; ++format) {
+				width *= 10;
+				width += *format - '0';
+			}
+			if ( *format == 's' ) {
+				register char *s = (char *)va_arg( args, int );
+				pc += prints(out, s?s:"(null)", width, pad);
+				continue;
+			}
+			if ( *format == 'd' ) {
+				pc += printi(out, va_arg( args, int ), 10, 1, width, pad, 'a');
+				continue;
+			}
+			if ( *format == 'x' ) {
+				pc += printi(out, va_arg( args, int ), 16, 0, width, pad, 'a');
+				continue;
+			}
+			if ( *format == 'X' ) {
+				pc += printi(out, va_arg( args, int ), 16, 0, width, pad, 'A');
+				continue;
+			}
+			if ( *format == 'u' ) {
+				pc += printi(out, va_arg( args, int ), 10, 0, width, pad, 'a');
+				continue;
+			}
+			if ( *format == 'c' ) {
+				/* char are converted to int then pushed on the stack */
+				scr[0] = (char)va_arg( args, int );
+				scr[1] = '\0';
+				pc += prints (out, scr, width, pad);
+				continue;
+			}
+		} else {
+		out:
+			printchar (out, *format);
+			++pc;
 		}
-		case 'c': // char handler
-			*str++ = (u8int)va_arg(*args, s32int);
-			break;
-		case 'x': // hex handler
-			str = writeHex(str, va_arg(*args, u32int));
-			break;
-		case 'd': // decimal handler
-			str = writeDec(str, va_arg(*args, s32int));
-			break;
-		default: // just print format
-			*str++ = '%';
-			*str++ = fmt;
 	}
-	return str;
-}
-
-int vsprintf(s8int* buf, const s8int* fmt, va_list args) {
-	while (*fmt) {
-		switch (*fmt) {
-			case '%':
-				buf = handleFormatChar(buf, *(++fmt), &args);
-				++fmt;
-				break;
-			default:
-				*buf = *fmt;
-				++buf, ++fmt;
-		}
-	}
-	*buf = 0;
-	return 0;
+	if (out) **out = '\0';
+	va_end(args);
+	return pc;
 }
 
 int sprintf(s8int* str, const s8int* fmt, ...) {
 	va_list args;
-	s32int ret;
 
 	va_start(args, fmt);
-	ret = vsprintf(str, fmt, args);
-	va_end(args);
 
-	consoleWrite(str);
-	return ret;
+	return print(&str, fmt, args);
 };
 
 int printf(const s8int *fmt, ...) {
-	s8int buffer[128];
 	va_list args;
-	s32int ret;
 
 	va_start(args, fmt);
-	ret = vsprintf(buffer, fmt, args);
-	va_end(args);
 
-	consoleWrite(buffer);
-	return ret;
-};
-
-int printfAt(const u8int x, const u8int y, const s8int* fmt, ...) {
-	s8int buffer[128];
-	va_list args;
-	s32int ret;
-
-	va_start(args, fmt);
-	ret = vsprintf(buffer, fmt, args);
-	va_end(args);
-
-	consoleWriteAt(buffer, x, y);
-	return ret;
+	return print(0, fmt, args);
 };
