@@ -7,20 +7,20 @@
 #include "isr.h"
 
 typedef struct {
-	u32int present : 1; // Page present in memory
-	u32int rw : 1; // Read-only if clear, readwrite if set
-	u32int user : 1; // Supervisor level only if clear
-	u32int accessed : 1; // Has the page been accessed since last refresh?
-	u32int dirty : 1; // Has the page been written to since last refresh?
-	u32int unused : 7; // Amalgamation of unused and reserved bits
-	u32int frame : 20; // Frame address (shifted right 12 bits)
+	u32int present    : 1;   // Page present in memory
+	u32int rw         : 1;   // Read-only if clear, readwrite if set
+	u32int user       : 1;   // Supervisor level only if clear
+	u32int accessed   : 1;   // Has the page been accessed since last refresh?
+	u32int dirty      : 1;   // Has the page been written to since last refresh?
+	u32int unused     : 7;   // Amalgamation of unused and reserved bits
+	u32int frame      : 20;  // Frame address (shifted right 12 bits)
 } pageT;
 
 typedef struct {
 	pageT pages[1024];
 } pageTableT;
 
-typedef struct{
+typedef struct {
 	/*
 		Array of pointers to pagetables.
 	*/
@@ -51,19 +51,16 @@ void initPaging();
 */
 void switchPageDir(pageDirT*);
 
-void newFrame(pageT*, int, int);
-void freeFrame(pageT*);
-
 /*
 	Retrieves a pointer to the page required.
 	If make == 1, if the page-table in which this page should
 	reside isn't created, create it!
 */
-pageT* getPage(u32int, int, pageDirT*);
+pageT* getPage(u32int, const int, pageDirT*);
 
 /*
 	Handler for page faults.
 */
 void pageFault(registers);
 
-#endif
+#endif // PAGING_H

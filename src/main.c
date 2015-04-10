@@ -29,6 +29,7 @@ int kmain(struct multiboot* mboot) {
 
 	// All our initialisation calls will go in here.
 	initDescTables();
+	initPaging();
 
 	consoleClear();
 	sayHello();
@@ -36,18 +37,10 @@ int kmain(struct multiboot* mboot) {
 	__asm__ __volatile__("sti");
 	initKeyboard(); // Init keyboard
 	initClock(); // Init CMOS clock
-	//initTimer(50); // Init timer to 50Hz
-	u32int a = kNew(8);
-	initPaging();
-	u32int b = kNew(8);
-	u32int c = kNew(8);
-	printf("a: %x\n", a);
-	printf("b: %x\n", b);
-	printf("c: %x\n", c);
-	kFree((void*)c);
-	kFree((void*)b);
-	u32int d = kNew(12);
-	printf("d: %x\n", d);
+	initTimer(50); // Init timer to 50Hz
+
+	//u32int *ptr = (u32int*)0xA0000000;
+	//u32int do_page_fault = *ptr;
 
 	return 0xdeadbeef;
 }
