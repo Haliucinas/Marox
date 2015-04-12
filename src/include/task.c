@@ -42,57 +42,57 @@ void initTasking() {
 }
 
 void moveStack(void* newStackStart, u32int size) {
-  // Allocate some space for the new stack.
-  for( u32int i = (u32int)newStackStart;
-	   i >= ((u32int)newStackStart-size);
-	   i -= 0x1000) {
-	// General-purpose stack is in user-mode.
-	allocFrame( getPage(i, 1, currentDir), 0 /* User mode */, 1 /* Is writable */ );
-  }
-  
-  // Flush the TLB by reading and writing the page directory address again.
-  u32int pdAddr;
-  __asm__ __volatile__("mov %%cr3, %0" : "=r" (pdAddr));
-  __asm__ __volatile__("mov %0, %%cr3" : : "r" (pdAddr));
-
-  // Old ESP and EBP, read from registers.
-  u32int oldStackPointer; __asm__ __volatile__("mov %%esp, %0" : "=r" (oldStackPointer));
-  u32int oldBasePointer;  __asm__ __volatile__("mov %%ebp, %0" : "=r" (oldBasePointer));
-
-  // Offset to add to old stack addresses to get a new stack address.
-  u32int offset = (u32int)newStackStart - initEsp;
-
-  // New ESP and EBP.
-  u32int newStackPointer = oldStackPointer + offset;
-  u32int newBasePointer  = oldBasePointer  + offset;
-
-  // Copy the stack.
-  memcpy((void*)newStackPointer, (void*)oldStackPointer, initEsp-oldStackPointer);
-
-  // Backtrace through the original stack, copying new values into
-  // the new stack.  
-  for(u32int i = (u32int)newStackStart; i > (u32int)newStackStart-size; i -= 4) {
-	u32int tmp = *(u32int*)i;
-	// If the value of tmp is inside the range of the old stack, assume it is a base pointer
-	// and remap it. This will unfortunately remap ANY value in this range, whether they are
-	// base pointers or not.
-	if (( oldStackPointer < tmp) && (tmp < initEsp)) {
-	  tmp = tmp + offset;
-	  u32int *tmp2 = (u32int*)i;
-	  *tmp2 = tmp;
+	// Allocate some space for the new stack.
+	for(u32int i = (u32int)newStackStart; i >= ((u32int)newStackStart-size); i -= 0x1000) {
+		// General-purpose stack is in user-mode.
+		allocFrame(getPage(i, 1, currentDir), 0 /* User mode */, 1 /* Is writable */ );
 	}
-  }
+	
+	// Flush the TLB by reading and writing the page directory address again.
+	u32int pdAddr;
+	__asm__ __volatile__("mov %%cr3, %0" : "=r" (pdAddr));
+	__asm__ __volatile__("mov %0, %%cr3" : : "r" (pdAddr));
 
-  // Change stacks.
-  __asm__ __volatile__("mov %0, %%esp" : : "r" (newStackPointer));
-  __asm__ __volatile__("mov %0, %%ebp" : : "r" (newBasePointer));
+	// Old ESP and EBP, read from registers.
+	u32int oldStackPointer; 
+	__asm__ __volatile__("mov %%esp, %0" : "=r" (oldStackPointer));
+	u32int oldBasePointer;	
+	__asm__ __volatile__("mov %%ebp, %0" : "=r" (oldBasePointer));
+
+	// Offset to add to old stack addresses to get a new stack address.
+	u32int offset = (u32int)newStackStart - initEsp;
+
+	// New ESP and EBP.
+	u32int newStackPointer = oldStackPointer + offset;
+	u32int newBasePointer	= oldBasePointer	+ offset;
+
+	// Copy the stack.
+	memcpy((void*)newStackPointer, (void*)oldStackPointer, initEsp-oldStackPointer);
+
+	// Backtrace through the original stack, copying new values into
+	// the new stack.	
+	for(u32int i = (u32int)newStackStart; i > (u32int)newStackStart-size; i -= 4) {
+		u32int tmp = *(u32int*)i;
+		// If the value of tmp is inside the range of the old stack, assume it is a base pointer
+		// and remap it. This will unfortunately remap ANY value in this range, whether they are
+		// base pointers or not.
+		if (( oldStackPointer < tmp) && (tmp < initEsp)) {
+			tmp = tmp + offset;
+			u32int *tmp2 = (u32int*)i;
+			*tmp2 = tmp;
+		}
+	}
+
+	// Change stacks.
+	__asm__ __volatile__("mov %0, %%esp" : : "r" (newStackPointer));
+	__asm__ __volatile__("mov %0, %%ebp" : : "r" (newBasePointer));
 }
 
 u32int switchTask(u32int oldEsp) {
 /*	// If we haven't initialised tasking yet, just return.
 	if (!timerLockFree) {
 		newDirAddr = currentTask->pageDir->physicalAddr;
-	  return oldEsp;
+		return oldEsp;
 	}*/
 	tick = ++tick % 100000;
 	

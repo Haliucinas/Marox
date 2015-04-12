@@ -19,17 +19,23 @@ int i = 0;
 
 void plus() {
 	while (1) {
-		printf("Thread %d made i + 5 = %d\n", getPid(), i+=5);
-		printf("Sleeping for %d second\n", 1);
-		sleep(100);
+		printf("Thread %d: i + 5 = %d, sleeps for %d seconds\n", getPid(), i+=5, 5);
+		sleep(500);
 	}
 }
 
 void minus() {
 	while (1) {
-		printf("Thread %d made i - 6 = %d\n", getPid(), i-=6);
-		printf("Sleeping for %d.%d seconds\n", 1,5);
-		sleep(150);
+		printf("Thread %d: i - 6 = %d, sleeps for %d.%d seconds\n", getPid(), i-=6, 7, 5);
+		sleep(750);
+	}
+}
+
+void reset() {
+	while (1) {
+		i = 0;
+		printf("Thread %d: i = 0, sleeps for %d seconds\n", getPid(), 30);
+		sleep(3000);
 	}
 }
 
@@ -71,6 +77,7 @@ int kmain(struct multiboot* mboot, u32int initStack) {
 
 	createTask(&plus);
 	createTask(&minus);
+	createTask(&reset);
 
 	return 0xdeadbeef;
 }
