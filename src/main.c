@@ -15,15 +15,14 @@
 u32int initEsp;
 u32int maxHeapSize = 0x100000;
 
-
 int i = 0;
 
 void plus() {
-	while (1) printf("Thread %d made i = %d\n", getPid(), ++i);
+	while (1) printf("Thread %d made i = %d\n", getPid(), i+=5);
 }
 
 void minus() {
-	while (1) printf("Thread %d made i = %d\n", getPid(), --i);
+	while (1) printf("Thread %d made i = %d\n", getPid(), i-=5);
 }
 
 void sayHello() {

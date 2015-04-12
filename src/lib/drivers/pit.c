@@ -5,16 +5,6 @@
 #include "../../include/task.h"
 #include "../printf.h"
 
-u32int tick = 0;
-int timerLockFree = 1;
-
-/*static void timerCallback(registers regs) {
-	++tick;
-	if (tick % 180 == 0) {
-		printf("Tick: %d\n", tick);
-	}
-}*/
-
 void initTimer(u32int frequency) {
 	// Firstly, register our timer callback.
 	registerInterruptHandler2(IRQ0, &switchTask);
