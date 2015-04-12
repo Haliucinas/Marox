@@ -18,11 +18,19 @@ u32int maxHeapSize = 0x100000;
 int i = 0;
 
 void plus() {
-	while (1) printf("Thread %d made i = %d\n", getPid(), i+=5);
+	while (1) {
+		printf("Thread %d made i + 5 = %d\n", getPid(), i+=5);
+		printf("Sleeping for %d second\n", 1);
+		sleep(100);
+	}
 }
 
 void minus() {
-	while (1) printf("Thread %d made i = %d\n", getPid(), i-=5);
+	while (1) {
+		printf("Thread %d made i - 6 = %d\n", getPid(), i-=6);
+		printf("Sleeping for %d.%d seconds\n", 1,5);
+		sleep(150);
+	}
 }
 
 void sayHello() {
@@ -55,7 +63,7 @@ int kmain(struct multiboot* mboot, u32int initStack) {
 	printf("[ %2kOK%15k ] Keyboard driver started.\n");
 	initClock(); // Init CMOS clock
 	printf("[ %2kOK%15k ] Clock driver started.\n");
-	initTimer(1); // Init timer to 50Hz
+	initTimer(100); // Init timer to 100Hz
 	printf("[ %2kOK%15k ] Timer started.\n");
 
 	//u32int *ptr = (u32int*)0xA0000000;

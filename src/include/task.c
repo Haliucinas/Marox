@@ -19,8 +19,9 @@ extern u32int initEsp;
 extern u32int readEip();
 
 // The next available process ID.
-u32int nextPid = 1;
+u32int nextPid = 0;
 u32int newDirAddr;
+u32int tick = 0;
 
 void initTasking() {
 	// Rather important stuff happening, no interrupts please!
@@ -93,6 +94,7 @@ u32int switchTask(u32int oldEsp) {
 		newDirAddr = currentTask->pageDir->physicalAddr;
 	  return oldEsp;
 	}*/
+	tick = ++tick % 100000;
 	
 	if (!currentTask) {
 		return oldEsp;
@@ -154,7 +156,7 @@ int createTask(void (*thread)()) {
 	newTask->id = nextPid++;
 	newTask->pageDir = directory;
 	newTask->next = 0;
-	
+
 	taskT* tempTask = (taskT*)readeQueue;
 	while (tempTask->next)
 		tempTask = tempTask->next;
@@ -167,4 +169,9 @@ int createTask(void (*thread)()) {
 
 int getPid() {
 	return currentTask->id;
+}
+
+void sleep(u32int ticks) {
+	u32int wake = ticks + tick;
+	do {} while (wake > tick); 
 }

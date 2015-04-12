@@ -102,7 +102,10 @@ void consolePut(const char chr) {
 	consolePutInner(chr);
 
 	// Scroll the screen if needed.
+	__asm__ __volatile__("cli");
 	scroll();
+	__asm__ __volatile__("sti");
+	
 	// Move the hardware cursor.
 	moveCursor();
 }

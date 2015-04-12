@@ -33,4 +33,6 @@ void moveStack(void*, u32int);
 // Returns the pid of the current process.
 int getPid();
 
+void sleep(u32int);
+
 #endif
