@@ -133,6 +133,14 @@ static int print(char** out, const char* format, va_list args) {
 				pc += prints (out, scr, width, pad);
 				continue;
 			}
+			if ( *format == 'K' ) {
+				consoleColorBG(width);
+				continue;
+			}
+			if ( *format == 'k' ) {
+				consoleColorText(width);
+				continue;
+			}
 		} else {
 		out:
 			printchar (out, *format);
