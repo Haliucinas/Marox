@@ -64,7 +64,15 @@ ISR_NOERRCODE 28
 ISR_NOERRCODE 29
 ISR_NOERRCODE 30
 ISR_NOERRCODE 31
-IRQ 0, 32
+
+; exceptional irq0
+	global irq0
+	irq0:
+		cli
+		push byte 0
+		push byte 32
+		jmp irq0Stub
+
 IRQ 1, 33
 IRQ 2, 34
 IRQ 3, 35
@@ -84,6 +92,9 @@ IRQ 15, 47
 ; In isr.c
 extern isrHandler
 extern irqHandler
+; In task.c
+extern switchTask
+extern newDirAddr
 
 ; This is our common ISR stub. It saves the processor state, sets
 ; up for kernel mode segments, calls the C-level fault handler,
@@ -140,3 +151,38 @@ irqCommonStub:
 	add esp, 8 ; Cleans up the pushed error code and pushed ISR number
 	sti
 	iret ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
+
+irq0Stub:
+	;Notice there is no IRQ number or error code - we don't need them
+
+	pusha		  ;Push all standard registers
+
+	mov ax, ds			   ; Lower 16-bits of eax = ds.
+	push eax				 ; save the data segment descriptor
+
+	mov ax, 0x10  ; load the kernel data segment descriptor
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+
+	push esp	   ;Push pointer to old esp
+	call switchTask ;Call C code
+
+	mov esp, eax   ;Replace the stack with what the C code gave us. ebp is the same for all threads.
+	mov eax, [newDirAddr]
+	mov cr3, eax ; Install new directory
+
+	mov al, 0x20   ;Port number AND command number to Acknowledge IRQ
+	out 0x20, al	 ;Acknowledge IRQ, so we keep getting interrupts
+
+	pop ebx		; reload the original data segment descriptor
+	mov ds, bx
+	mov es, bx
+	mov fs, bx
+	mov gs, bx
+
+	popa		   ;Put the standard registers back
+	add esp, 8
+	sti
+	iret		   ;Interrupt-Return

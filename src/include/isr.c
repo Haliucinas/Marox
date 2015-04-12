@@ -4,10 +4,14 @@
 #include "isr.h"
 #include "../lib/printf.h"
 
-isr interruptHandlers[256];
+isrT interruptHandlers[256];
 
-void registerInterruptHandler(u8int n, isr handler) {
+void registerInterruptHandler(u8int n, isrT handler) {
 	interruptHandlers[n] = handler;
+}
+
+void registerInterruptHandler2(u8int n, isr2T handler) {
+    interruptHandlers[n] = (isrT)handler;
 }
 
 void isrHandler(registers regs) {
@@ -17,7 +21,7 @@ void isrHandler(registers regs) {
 	// bit (0x80) is set, regs.intNo will be very large (about 0xffffff80).
 	u8int intNo = regs.intNo & 0xFF;
 	if (interruptHandlers[intNo] != 0) {
-		isr handler = interruptHandlers[intNo];
+		isrT handler = interruptHandlers[intNo];
 		handler(regs);
 	} else {
 		printf("Unhandled interrupt: no. %x\n", regs.intNo);
@@ -37,7 +41,7 @@ void irqHandler(registers regs) {
 	outb(0x20, 0x20);
 
 	if (interruptHandlers[regs.intNo] != 0) {
-		isr handler = interruptHandlers[regs.intNo];
+		isrT handler = interruptHandlers[regs.intNo];
 		handler(regs);
     }
 

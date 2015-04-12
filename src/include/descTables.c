@@ -2,6 +2,8 @@
 //                default ISR and IRQ handler.
 
 #include "descTables.h"
+#include "common.h"
+#include "isr.h"
 
 // Lets us access our ASM functions from our C code.
 extern void gdtFlush(const u32int);
@@ -17,11 +19,16 @@ gdtEntry gdtEntries[5];
 idtEntry idtEntries[256];
 dtPtr gdtPtr, idtPtr;
 
+// Extern the ISR handler array so we can nullify them on startup.
+extern isrT interruptHandlers[];
+
 void initDescTables() {
 	// Initialise the global descriptor table.
 	initGdt();
 	// Initialise the interrupt descriptor table.
 	initIdt();
+	// Nullify all the interrupt handlers.
+	memset(&interruptHandlers, 0, sizeof(isrT)*256);
 }
 
 static void initGdt() {

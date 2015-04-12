@@ -6,6 +6,8 @@
 #include "common.h"
 #include "isr.h"
 
+#define STACK_TOP 0xE0000000
+
 typedef struct {
 	u32int present    : 1;   // Page present in memory
 	u32int rw         : 1;   // Read-only if clear, readwrite if set
@@ -39,6 +41,8 @@ typedef struct {
 	u32int physicalAddr;
 } pageDirT;
 
+extern void copyPagePhysical(u32int source, u32int destination);
+
 /*
 	Sets up the environment, page directories etc and
 	enables paging.
@@ -62,5 +66,10 @@ pageT* getPage(u32int, const int, pageDirT*);
 	Handler for page faults.
 */
 void pageFault(registers);
+
+/*
+	Makes a copy of a page directory.
+*/
+pageDirT* cloneDir(pageDirT*);
 
 #endif // PAGING_H

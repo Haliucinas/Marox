@@ -8,8 +8,23 @@
 #include "include/paging.h"
 #include "lib/kheap.h"
 #include "include/multiboot.h"
+#include "include/task.h"
 
 #define OS_NAME "Marox OS"
+
+u32int initEsp;
+u32int maxHeapSize = 0x100000;
+
+
+int i = 0;
+
+void plus() {
+	while (1) printf("Thread %d made i = %d\n", getPid(), ++i);
+}
+
+void minus() {
+	while (1) printf("Thread %d made i = %d\n", getPid(), --i);
+}
 
 void sayHello() {
 	const char* welcome = (char*)"Welcome to ";
@@ -24,8 +39,8 @@ void sayHello() {
 	consoleColorBG(BLACK);
 }
 
-int kmain(struct multiboot* mboot) {
-
+int kmain(struct multiboot* mboot, u32int initStack) {
+	initEsp = initStack;
 	consoleClear();
 	sayHello();
 	// All our initialisation calls will go in here.
@@ -33,18 +48,22 @@ int kmain(struct multiboot* mboot) {
 	printf("[ %2kOK%15k ] Descriptor tables initialised.\n");
 	initPaging();
 	printf("[ %2kOK%15k ] Paging enabled.\n");
-
+	initTasking();
+	printf("[ %2kOK%15k ] Tasking enabled.\n");
 
 	__asm__ __volatile__("sti");
 	initKeyboard(); // Init keyboard
 	printf("[ %2kOK%15k ] Keyboard driver started.\n");
 	initClock(); // Init CMOS clock
 	printf("[ %2kOK%15k ] Clock driver started.\n");
-	initTimer(50); // Init timer to 50Hz
+	initTimer(1); // Init timer to 50Hz
 	printf("[ %2kOK%15k ] Timer started.\n");
 
 	//u32int *ptr = (u32int*)0xA0000000;
 	//u32int do_page_fault = *ptr;
+
+	createTask(&plus);
+	createTask(&minus);
 
 	return 0xdeadbeef;
 }

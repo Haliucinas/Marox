@@ -2,20 +2,22 @@
 
 #include "pit.h"
 #include "../../include/isr.h"
+#include "../../include/task.h"
 #include "../printf.h"
 
 u32int tick = 0;
+int timerLockFree = 1;
 
-static void timerCallback(registers regs) {
+/*static void timerCallback(registers regs) {
 	++tick;
 	if (tick % 180 == 0) {
 		printf("Tick: %d\n", tick);
 	}
-}
+}*/
 
 void initTimer(u32int frequency) {
 	// Firstly, register our timer callback.
-	registerInterruptHandler(IRQ0, &timerCallback);
+	registerInterruptHandler2(IRQ0, &switchTask);
 
 	// The value we send to the PIT is the value to divide it's input clock
 	// (1193180 Hz) by, to get our required frequency. Important to note is

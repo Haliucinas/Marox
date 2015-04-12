@@ -16,6 +16,8 @@ u32int nframes;
 
 // Defined in kheap.c
 extern u32int placementAddr;
+// Defined in kernel.c
+extern u32int maxHeapSize;
 
 // Macros used in the bitset algorithms.
 #define INDEX_FROM_BIT(a) (a/(8*4))
@@ -74,6 +76,9 @@ void allocFrame(pageT* page, const int isKernel, const int isWriteable) {
 		page->rw = (isWriteable) ? 1 : 0;
 		page->user = (isKernel) ? 0 : 1;
 		page->frame = idx;
+		page->accessed = 0;
+		page->dirty = 0;
+		page->unused = 0;
 	}
 }
 
@@ -99,7 +104,8 @@ void initPaging() {
 
 	// Let's make a page directory.
 	kernelDir = (pageDirT*)kNewA(sizeof(pageDirT));
-	currentDir = kernelDir;
+	memset(kernelDir, 0, sizeof(pageDirT));
+	kernelDir->physicalAddr = (u32int)kernelDir->tablesPhysical;
 
 	// We need to identity map (phys addr = virt addr) from
 	// 0x0 to the end of used memory, so we can access this
@@ -109,7 +115,7 @@ void initPaging() {
 	// by calling kmalloc(). A while loop causes this to be
 	// computed on-the-fly rather than once at the start.
 	int i = 0;
-	while (i < placementAddr) {
+	while (i < placementAddr+maxHeapSize+0x1000) {
 		// Kernel code is readable but not writeable from userspace.
 		allocFrame(getPage(i, 1, kernelDir), 0, 0);
 		i += 0x1000;
@@ -119,15 +125,17 @@ void initPaging() {
 
 	// Now, enable paging!
 	switchPageDir(kernelDir);
+	currentDir = cloneDir(kernelDir);
+	switchPageDir(currentDir);
 }
 
 void switchPageDir(pageDirT* dir) {
-    currentDir = dir;
-    __asm__ __volatile__("mov %0, %%cr3":: "r"(&dir->tablesPhysical));
-    u32int cr0;
-    __asm__ __volatile__("mov %%cr0, %0": "=r"(cr0));
-    cr0 |= 0x80000000; // Enable paging!
-    __asm__ __volatile__("mov %0, %%cr0":: "r"(cr0));
+	currentDir = dir;
+	__asm__ __volatile__("mov %0, %%cr3":: "r"(&dir->tablesPhysical));
+	u32int cr0;
+	__asm__ __volatile__("mov %%cr0, %0": "=r"(cr0));
+	cr0 |= 0x80000000; // Enable paging!
+	__asm__ __volatile__("mov %0, %%cr0":: "r"(cr0));
 }
 
 pageT* getPage(u32int address, const int make, pageDirT* dir) {
@@ -156,10 +164,10 @@ void pageFault(registers regs) {
 
 	// The error code gives us details of what happened.
 	int present = !(regs.errCode & 0x1); // Page not present
-	int rw = regs.errCode & 0x2;         // Write operation?
-	int us = regs.errCode & 0x4;         // Processor was in user-mode?
+	int rw = regs.errCode & 0x2;		 // Write operation?
+	int us = regs.errCode & 0x4;		 // Processor was in user-mode?
 	int reserved = regs.errCode & 0x8;   // Overwritten CPU-reserved bits of page entry?
-	int id = regs.errCode & 0x10;        // Caused by an instruction fetch?
+	int id = regs.errCode & 0x10;		// Caused by an instruction fetch?
 
 	// Output an error message.
 	printf("Page fault! ( ");
@@ -170,4 +178,61 @@ void pageFault(registers regs) {
 	printf(") at ");
 	printf("%x\n", faultingAddr);
 	PANIC("Page fault");
+}
+
+static pageTableT* cloneTable(pageTableT* src, u32int* physAddr) {
+	// Make a new page table, which is page aligned.
+	pageTableT* table = (pageTableT*)kNewAP(sizeof(pageTableT), physAddr);
+	// Ensure that the new table is blank.
+	memset(table, 0, sizeof(pageDirT));
+
+	// For every entry in the table...
+	for (int i = 0; i < 1024; ++i) {
+		// If the source entry has a frame associated with it...
+		if (src->pages[i].frame) {
+			// Get a new frame.
+			allocFrame(&table->pages[i], 0, 0);
+			// Clone the flags from source to destination.
+			if (src->pages[i].present) table->pages[i].present = 1;
+			if (src->pages[i].rw) table->pages[i].rw = 1;
+			if (src->pages[i].user) table->pages[i].user = 1;
+			if (src->pages[i].accessed) table->pages[i].accessed = 1;
+			if (src->pages[i].dirty) table->pages[i].dirty = 1;
+			// Physically copy the data across. This function is in process.s.
+			copyPagePhysical(src->pages[i].frame*0x1000, table->pages[i].frame*0x1000);
+		}
+	}
+	return table;
+}
+
+pageDirT* cloneDir(pageDirT* src) {
+	u32int phys;
+	// Make a new page directory and obtain its physical address.
+	pageDirT* dir = (pageDirT*)kNewAP(sizeof(pageDirT), &phys);
+	// Ensure that it is blank.
+	memset(dir, 0, sizeof(pageDirT));
+
+	// Get the offset of tablesPhysical from the start of the pageDirT structure.
+	u32int offset = (u32int)dir->tablesPhysical - (u32int)dir;
+
+	// Then the physical address of dir->tablesPhysical is:
+	dir->physicalAddr = phys + offset;
+
+	// Go through each page table. If the page table is in the kernel directory, do not make a new copy.
+	for (int i = 0; i < 1024; ++i) {
+		if (!src->tables[i])
+			continue;
+
+		if (kernelDir->tables[i] == src->tables[i]) {
+			// It's in the kernel, so just use the same pointer.
+			dir->tables[i] = src->tables[i];
+			dir->tablesPhysical[i] = src->tablesPhysical[i];
+		} else {
+			// Copy the table.
+			u32int phys;
+			dir->tables[i] = cloneTable(src->tables[i], &phys);
+			dir->tablesPhysical[i] = phys | 0x07;
+		}
+	}
+	return dir;
 }
