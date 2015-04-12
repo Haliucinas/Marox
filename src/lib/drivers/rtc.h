@@ -3,6 +3,8 @@
 
 #include "../../include/common.h"
 
+#define BUFF_SIZE 19
+
 typedef struct {
 	u8int seconds;
 	u8int minutes;
@@ -15,5 +17,6 @@ typedef struct {
 } clockT;
 
 void initClock();
+u8int timeBuf[BUFF_SIZE];
 
 #endif //RTC_H

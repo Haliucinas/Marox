@@ -159,3 +159,7 @@ int printf(const s8int *fmt, ...) {
 
 	return print(0, fmt, args);
 };
+
+void printfAt(const s8int* str, const u8int x, const u8int y) {
+	consoleWriteAt(str, x, y);
+};

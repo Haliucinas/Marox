@@ -15,13 +15,13 @@ void sayHello() {
 	const char* welcome = (char*)"Welcome to ";
 	const char* end = (char*)"!\n";
 
-	/*consoleColorBG(DARK_GRAY);
-	printfAt(0, 0, "%s", welcome);
+	consoleColorBG(DARK_GRAY);
+	printfAt(welcome, 0, 0);
 	consoleColorText(LIGHT_GRAY);
-	printfAt(11, 0, "%s", OS_NAME);
+	printfAt(OS_NAME, 11, 0);
 	consoleColorText(WHITE);
-	printfAt(19, 0, "%s", end);
-	consoleColorBG(BLACK);*/
+	printfAt(end, 19, 0);
+	consoleColorBG(BLACK);
 }
 
 int kmain(struct multiboot* mboot) {
@@ -31,7 +31,7 @@ int kmain(struct multiboot* mboot) {
 	initPaging();
 
 	consoleClear();
-	//sayHello();
+	sayHello();
 
 	__asm__ __volatile__("sti");
 	initKeyboard(); // Init keyboard

@@ -2,7 +2,6 @@
 #include "../printf.h"
 #include "../../include/isr.h"
 #include "../../include/common.h"
-#include "../../include/console.h"
 
 clockT clock;
 
@@ -55,6 +54,15 @@ void clockCallback() {
 			clock.hours,
 			clock.minutes,
 			clock.seconds);*/
+		sprintf(timeBuf, "%d%d-%02d-%02d %02d:%02d:%02d",
+			clock.century,
+			clock.year,
+			clock.month,
+			clock.dayOfMonth,
+			clock.hours,
+			clock.minutes,
+			clock.seconds);
+		printfAt(timeBuf, 61, 24);
 		consoleColorBG(BLACK);
 		ticks = 0;
 	}
