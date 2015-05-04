@@ -17,6 +17,23 @@ u32int maxHeapSize = 0x100000;
 
 int i = 0;
 
+
+void print_register_values() {
+    __volatile__ u32int eaxValue, ebxValue, ecxValue, edxValue;
+
+    while (1) {
+
+        __asm__ ("mov %%EAX, %0": "=r" (eaxValue));
+        __asm__ ("mov %%EBX, %0": "=r" (ebxValue));
+        __asm__ ("mov %%ECX, %0": "=r" (ecxValue));
+        __asm__ ("mov %%EDX, %0": "=r" (edxValue));
+
+        printf("[EAX=%x; EBX=%x; ECX=%x; EDX=%x]\n", eaxValue, ebxValue, ecxValue, edxValue);
+
+        sleep(1000);
+    }
+}
+
 void plus() {
 	while (1) {
 		printf("Thread %d: i + 5 = %d, sleeps for %d seconds\n", getPid(), i+=5, 5);
@@ -78,6 +95,7 @@ int kmain(struct multiboot* mboot, u32int initStack) {
 	createTask(&plus);
 	createTask(&minus);
 	createTask(&reset);
+	createTask(&print_register_values);
 
 	return 0xdeadbeef;
 }
