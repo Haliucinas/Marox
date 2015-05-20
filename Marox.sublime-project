@@ -2,18 +2,13 @@
 	"folders":
 	[
 		{
-			"name": "Marox",
-			"path": "./src",
-            "folder_exclude_patterns": ["include", "lib", "modules", "obj", "tools"],
+			"name": "kernel",
+			"path": "./kernel",
+		},
+		{
+            "name": "modules",
+			"path": "./modules",
             "file_exclude_patterns": ["*.bin"]
-		},
-		{
-            "name": "include",
-			"path": "./src/include"
-		},
-		{
-            "name": "lib",
-			"path": "./src/lib"
 		}
 	]
 }
