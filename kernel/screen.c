@@ -5,12 +5,10 @@
 /* global attribute for all chars printed to console */
 static uint8_t g_attr = WHITE_ON_BLACK;
 
-
 static unsigned int getCursorOffset();
 static void setCursorOffset(unsigned int offset);
 static unsigned int screenOffset(int row, int col);
 static unsigned int scrollScreen(unsigned int offset);
-
 
 char kPutChar(char ch) {
     char* vidmem = (char *) VIDEO_ADDR;
@@ -20,6 +18,10 @@ char kPutChar(char ch) {
     if (ch == '\n') {
         int row = offset / (VIDEO_COLS * 2);
         offset = screenOffset(row + 1, 0);
+    } else if (ch == '\b') {
+        offset -= 2;
+        vidmem[offset] = ' ';
+        vidmem[offset+1] = g_attr;
     } else {
         vidmem[offset] = ch;
         vidmem[offset+1] = g_attr;

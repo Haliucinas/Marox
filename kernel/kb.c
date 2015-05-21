@@ -65,8 +65,8 @@ static keycode_t dequeueKeycode(void) {
 }
 
 static void toggleLight(unsigned int lightCode) {
-    while (inPortB(KBD_STATUS_REG) & KBD_STATUS_BUSY)
-        ;
+    while (inPortB(KBD_STATUS_REG) & KBD_STATUS_BUSY);
+
     outPortB(KBD_DATA_REG, 0xED);
     outPortB(KBD_DATA_REG, lightCode & 0xF);
 }
@@ -120,6 +120,7 @@ keycode_t waitForKey(void) {
 
     do {
         empty = (keycodeQueueHead == keycodeQueueTail);
+
         if (empty) {
             wait(&keycodeWaitQueue);
         } else {
@@ -150,17 +151,28 @@ int getLine(char* buff) {
     int i = 0;
     do {
         empty = (keycodeQueueHead == keycodeQueueTail);
+        
         if (empty) {
             wait(&keycodeWaitQueue);
         } else {
+            bool shouldPrintChar = false;
+
             kc = dequeueKeycode();
+
             if (kc != 0) {
-                buff[i] = kc;
+                if ((kc == '\b') && (i > 0)) {
+                    shouldPrintChar = true;
 
-                if (kc != '\n')
+                    i--;
+                } else {
+                    buff[i] = kc;
+                    shouldPrintChar = true;
+
+                    i++;
+                }
+
+                if ((kc != '\n') && shouldPrintChar)
                     kprintf("%c", kc);
-
-                i++;
             }
         }
     } while (kc != '\n');
