@@ -11,6 +11,7 @@ static page_t* g_freePageTail = NULL;
 static unsigned int g_freePageCount;
 static shm_t sharedMemory[100];
 static mutex_t shmLock;
+static thread_queue_t shmWaitQueue;
 
 /*
  * Determine if given address is a multiple of the page size.
@@ -276,11 +277,16 @@ int shmWrite(int desc, char* buffer) {
     } else {
         return -1;
     }
-
+    bool iFlag = begIntAtomic();
+    wakeOne(&shmWaitQueue);
+    endIntAtomic(iFlag);
     return 0;
 }
 
 int shmRead(int desc, char* buffer) {
+    bool iFlag = begIntAtomic();
+    wait(&shmWaitQueue);
+    endIntAtomic(iFlag);
     if (desc >= 0 && desc < 10) {
         strcpy(buffer, sharedMemory[desc].buffer);
     } else {

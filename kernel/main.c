@@ -121,10 +121,11 @@ void kMain(struct multiboot_info *mbInfo, multiboot_uint32_t mbootMagic) {
     thread_t* tst = spawnThread(mod0, 0, PRIORITY_NORMAL, false, false);
     // thread_t* test = spawnThread(testUsermode, 5, PRIORITY_NORMAL, false, true);
 
-    thread_t* shm_send = spawnThread(godThread, 42, PRIORITY_NORMAL, false, false);
+    // thread_t* shm_send = spawnThread(godThread, 42, PRIORITY_NORMAL, false, false);
+    // thread_t* shm_recv = spawnThread(testShmRead, 72, PRIORITY_NORMAL, false, false);
 
-    /*thread_t* shm_recv = spawnThread(
-            testShmRead, 72, PRIORITY_NORMAL, false, false);*/
+    thread_t* shm_send = spawnThread(testShmSend, 0, PRIORITY_NORMAL, false, false);
+    thread_t* shm_recv = spawnThread(testShmRead, 0, PRIORITY_NORMAL, false, false);
 
     // wait for some thread to finish (forever)
     join(datePrinter);
@@ -195,8 +196,7 @@ static void hogCPU(uint32_t arg) {
 
 static void testUsermode(uint32_t arg) {
     uprintf("testUsermode looping %u times...\n", arg);
-
-    unsigned int i = 0;
+    
     char *dst = (char*)syscall_malloc(42);
     
     syscall_getLine(dst);
@@ -210,7 +210,7 @@ static void testUsermode(uint32_t arg) {
     syscall_shmRead(0, buff);
 
     syscall_print(buff);
-    for (i = 0; i < arg; i++) {
+    for (int i = 0; i < arg; i++) {
         char *dst = (char*)syscall_malloc(42);
         strcpy(dst, "hello");
 
@@ -222,32 +222,40 @@ static void testUsermode(uint32_t arg) {
 
 static void testShmSend(uint32_t arg) {
     char* num = (char*)malloc(11);
-    kprintf("Enter range (1-x): ");
-    int len = getLine(num);
-    kprintf("\n");
-    num[len] = '\0';
-
     int shmDesc = shmGet();
-    shmWrite(shmDesc, num);
+    int len;
 
-    kprintf("Thread sent %s to shared mem.\n", num);
+    while (true) {
+        kprintf("Enter range (1-x): ");
+        len = getLine(num);
+        kprintf("\n");
+        num[len] = '\0';
+
+        shmWrite(shmDesc, num);
+
+        kprintf("Thread sent %s to shared mem.\n", num);
+        sleep(atoi(num)*500);
+    }
+
+    shmRelease(shmDesc);
     free(num);
 }
 
 static void testShmRead(uint32_t arg) {
-    sleep(5000);
     char buff[11];
-    shmRead(arg, buff);
-    int num = atoi(buff);
-    kprintf("Recv thread got: %d\nStarting prime check:\n", num);
-    
-    thread_t* list[num];
+    int num;
 
-    int i;
+    while (true) {
+        shmRead(arg, buff);
+        num = atoi(buff);
+        kprintf("Recv thread got: %d\nStarting prime check:\n", num);
+        
+        thread_t* list[num];
 
-    for (i = 1; i <= num; ++i) {
-        list[i] = spawnThread(isPrime, i, PRIORITY_NORMAL, false, false);
-        sleep(500);
+        for (int i = 1; i <= num; ++i) {
+            list[i] = spawnThread(isPrime, i, PRIORITY_NORMAL, false, false);
+            sleep(500);
+        }
     }
 }
 
@@ -261,9 +269,7 @@ static void godThread(uint32_t arg) {
 }
 
 static void isPrime(uint32_t arg) {
-    int i;
-
-    for (i = 2; i < arg; ++i) {
+    for (int i = 2; i < arg; ++i) {
         if (arg % i == 0 && i != arg) {
             kprintf("[Thread %d] %d is not a prime.\n", getCurrentThread()->id, arg);
             return;
