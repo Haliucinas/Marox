@@ -151,7 +151,7 @@ int getLine(char* buff) {
     int i = 0;
     do {
         empty = (keycodeQueueHead == keycodeQueueTail);
-        
+
         if (empty) {
             wait(&keycodeWaitQueue);
         } else {
@@ -159,21 +159,26 @@ int getLine(char* buff) {
 
             kc = dequeueKeycode();
 
+            // DEBUGF("i before key press: %d\n", i);
+
             if (kc != 0) {
                 if ((kc == '\b') && (i > 0)) {
                     shouldPrintChar = true;
-
                     i--;
-                } else {
+                } else if (kc != '\b') {
                     buff[i] = kc;
-                    shouldPrintChar = true;
+
+                    if (kc != '\n')
+                        shouldPrintChar = true;
 
                     i++;
                 }
 
-                if ((kc != '\n') && shouldPrintChar)
+                if (shouldPrintChar)
                     kprintf("%c", kc);
             }
+
+            // DEBUGF("i after key press: %d\n", i);
         }
     } while (kc != '\n');
 
