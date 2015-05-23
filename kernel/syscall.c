@@ -13,7 +13,7 @@ static void print(const char *msg) {
 
 DEFN_SYSCALL1(print, 0, const char*)
 DEFN_SYSCALL1(sleep, 1, unsigned int)
-DEFN_SYSCALL1(malloc, 2, size_t)
+DEFN_SYSCALL1(malloc, 2, int)
 DEFN_SYSCALL1(free, 3, void*)
 DEFN_SYSCALL1(exit, 4, int)
 DEFN_SYSCALL0(waitForKey, 5)

@@ -32,6 +32,7 @@
 #include "timer.h"
 #include "string.h"
 #include "thread.h"
+#include "syscall.h"
 
 /* List of all threads in the system */
 static thread_t* allThreadHead;
@@ -372,11 +373,11 @@ static void shutdownUserThread(void) {
 
 static void setupThreadStack(thread_t* thread,
         thread_startFunc_t startFunc, uint32_t arg, bool usermode) {
-    uint32_t *esp = (uint32_t*)thread->esp;
+    uint32_t* esp = (uint32_t*)thread->esp;
 
     if (usermode) {
         /* Set up CPL=3 stack */
-        uint32_t *uesp = thread->userEsp;
+        uint32_t* uesp = (uint32_t*)thread->userEsp;
         KASSERT(uesp != NULL);
 
         /* push the arg to the thread start function */
@@ -384,27 +385,27 @@ static void setupThreadStack(thread_t* thread,
 
         /* push the address of the shutdownThread function as the
         * return address. this forces the thread to exit */
-        *--uesp = shutdownUserThread;
+        *--uesp = (int)shutdownUserThread;
 
-        thread->userEsp = uesp;
+        thread->userEsp = (int)uesp;
 
         /* Set up CPL=0 stack */
         /* DEBUGF("Address of startFunc: %X\n", startFunc); */
-        *--esp = startFunc;
+        *--esp = (int)startFunc;
 
         extern void startUserMode(void);
-        *--esp = startUserMode;
+        *--esp = (int)startUserMode;
     } else {
         /* push the arg to the thread start function */
         *--esp = arg;
 
         /* push the address of the shutdownThread function as the
         * return address. this forces the thread to exit */
-        *--esp = shutdownKernelThread;
+        *--esp = (int)shutdownKernelThread;
 
-        *--esp = startFunc;
+        *--esp = (int)startFunc;
 
-        *--esp = launchKernelThread;
+        *--esp = (int)launchKernelThread;
     }
 
     /* push general registers */
@@ -417,7 +418,7 @@ static void setupThreadStack(thread_t* thread,
     *--esp = 0;     /* edi */
 
     /* update thread's ESP */
-    thread->esp = esp;
+    thread->esp = (int)esp;
 }
 
 static void idle(uint32_t arg) {

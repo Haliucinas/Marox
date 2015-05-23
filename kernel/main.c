@@ -36,14 +36,11 @@ uintptr_t loadMods(struct multiboot_info *mbInfo, struct modInfo *initRdInfo) {
         initRdInfo->start = physToVirt(mod->modStart);
         initRdInfo->end = physToVirt(mod->modEnd);
 
-        unsigned int i;
-        
-        for (i = 0; i < mbInfo->modCount; i++) {
+        for (unsigned int i = 0; i < mbInfo->modCount; ++i) {
             start = physToVirt(mod->modStart);
             end = physToVirt(mod->modEnd);
-            DEBUGF("Mod start: 0x%x, Mod end: 0x%x, Cmd line: %s\n",
-                    start, end, (char*)physToVirt(mod->cmdLine));
-            mod++;
+            DEBUGF("Mod start: 0x%x, Mod end: 0x%x, Cmd line: %s\n", start, end, (char*)physToVirt(mod->cmdLine));
+            ++mod;
         }
     }
     return end;
@@ -97,11 +94,10 @@ void kMain(struct multiboot_info *mbInfo, multiboot_uint32_t mbootMagic) {
     // Run GRUB module (which just returns the value of register ESP
     unsigned int len = initRdInfo.end - initRdInfo.start;
     dumpmem(initRdInfo.start, len);
-    typedef uint32_t (*call_module_t)(void);
+    typedef void (*call_module_t)(uint32_t);
     void *cp = malloc(len);
-    memcpy(cp, initRdInfo.start, len);
+    memcpy(cp, (const void*)initRdInfo.start, len);
     call_module_t mod0 = (call_module_t)cp;
-    uint32_t adr = mod0();
 
     // Test interrupt handler
     /* __asm__ volatile ("int $0x03");
@@ -120,9 +116,6 @@ void kMain(struct multiboot_info *mbInfo, multiboot_uint32_t mbootMagic) {
     thread_t* datePrinter = spawnThread(printDate, 0, PRIORITY_NORMAL, false, false);
     thread_t* tst = spawnThread(mod0, 0, PRIORITY_NORMAL, false, false);
     // thread_t* test = spawnThread(testUsermode, 5, PRIORITY_NORMAL, false, true);
-
-    // thread_t* shm_send = spawnThread(godThread, 42, PRIORITY_NORMAL, false, false);
-    // thread_t* shm_recv = spawnThread(testShmRead, 72, PRIORITY_NORMAL, false, false);
 
     thread_t* shm_send = spawnThread(testShmSend, 0, PRIORITY_NORMAL, false, false);
     thread_t* shm_recv = spawnThread(testShmRead, 0, PRIORITY_NORMAL, false, false);
@@ -256,15 +249,6 @@ static void testShmRead(uint32_t arg) {
             list[i] = spawnThread(isPrime, i, PRIORITY_NORMAL, false, false);
             sleep(500);
         }
-    }
-}
-
-static void godThread(uint32_t arg) {
-    int counter = 0;
-
-    while (1) {
-        testShmSend(0);
-        testShmRead(counter++);
     }
 }
 

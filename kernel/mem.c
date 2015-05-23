@@ -242,7 +242,7 @@ void shmInit(void) {
     int i;
     for (i = 0; i < 100; ++i) {
         sharedMemory[i].owner = 0;
-        sharedMemory[i].buffer = bgetz(0x1000);
+        sharedMemory[i].buffer = (uintptr_t)bgetz(0x1000);
     }
 }
 
@@ -263,7 +263,7 @@ int shmGet() {
 int shmRelease(int id) {
     if (sharedMemory[id].owner == getCurrentThread()->id) {
         sharedMemory[id].owner = 0;
-        memset(sharedMemory[id].buffer, 0, 0x1000);
+        memset((void*)sharedMemory[id].buffer, 0, 0x1000);
     } else {
         return -1;
     }
@@ -273,7 +273,7 @@ int shmRelease(int id) {
 
 int shmWrite(int desc, char* buffer) {
     if (sharedMemory[desc].owner == getCurrentThread()->id) {
-        strcpy(sharedMemory[desc].buffer, buffer);
+        strcpy((char*)sharedMemory[desc].buffer, buffer);
     } else {
         return -1;
     }
@@ -288,7 +288,7 @@ int shmRead(int desc, char* buffer) {
     wait(&shmWaitQueue);
     endIntAtomic(iFlag);
     if (desc >= 0 && desc < 10) {
-        strcpy(buffer, sharedMemory[desc].buffer);
+        strcpy(buffer, (const char*)sharedMemory[desc].buffer);
     } else {
         return -1;
     }

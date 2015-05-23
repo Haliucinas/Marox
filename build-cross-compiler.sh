@@ -25,11 +25,6 @@ binutils_arc=$binutils_ver.tar.bz2
 binutils_md5="d9f3303f802a5b6b0bb73a335ab89d66"
 binutils_url=ftp://ftp.gnu.org/gnu/binutils/$binutils_arc
 
-# libiconv_ver=libiconv-1.14
-# libiconv_arc=$libiconv_ver.tar.gz
-# libiconv_md5="e34509b1623cec449dfeb73d7ce9c6c6"
-# libiconv_url=ftp://ftp.gnu.org/gnu/libiconv/$libiconv_arc
-
 gcc_ver=gcc-5.1.0
 gcc_arc=$gcc_ver.tar.bz2
 gcc_md5="d5525b1127d07d215960e6051c5da35e"
@@ -46,15 +41,11 @@ fi
 if idonthave $gcc_arc $gcc_md5; then
     curl -LO $gcc_url
 fi
-# if idonthave $libiconv_arc $libiconv_md5; then
-#     curl -LO $libiconv_url
-# fi
 
 # Unpack
 cd $build_dir
 test -d $binutils_ver || tar xjf $binutils_arc
 test -d $gcc_ver || tar xjf $gcc_arc
-# test -d $libiconv_ver || tar xzf $libiconv_arc
 
 # Shuffle
 cd $build_dir
