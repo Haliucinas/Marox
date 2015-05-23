@@ -5,10 +5,10 @@ set -vex
 export PREFIX=$HOME/opt/cross
 export TARGET=i386-elf
 export PATH=$PREFIX/bin:$PATH
-export CC="gcc-4.9"
-export CXX="g++-4.9"
-export CPP="cpp-4.9"
-export LD="gcc-4.9"
+export CC="gcc"
+export CXX="g++"
+export CPP="cpp"
+export LD="gcc"
 
 idonthave() {
     md5=$(md5sum "$1" 2>/dev/null | cut -f1 -d\ )
@@ -20,9 +20,9 @@ idonthave() {
 
 build_dir=$HOME/src/cross
 
-binutils_ver=binutils-2.24
+binutils_ver=binutils-2.25
 binutils_arc=$binutils_ver.tar.bz2
-binutils_md5="e0f71a7b2ddab0f8612336ac81d9636b"
+binutils_md5="d9f3303f802a5b6b0bb73a335ab89d66"
 binutils_url=ftp://ftp.gnu.org/gnu/binutils/$binutils_arc
 
 # libiconv_ver=libiconv-1.14
@@ -30,9 +30,9 @@ binutils_url=ftp://ftp.gnu.org/gnu/binutils/$binutils_arc
 # libiconv_md5="e34509b1623cec449dfeb73d7ce9c6c6"
 # libiconv_url=ftp://ftp.gnu.org/gnu/libiconv/$libiconv_arc
 
-gcc_ver=gcc-4.9.1
+gcc_ver=gcc-5.1.0
 gcc_arc=$gcc_ver.tar.bz2
-gcc_md5="fddf71348546af523353bd43d34919c1"
+gcc_md5="d5525b1127d07d215960e6051c5da35e"
 gcc_url=ftp://ftp.gnu.org/gnu/gcc/$gcc_ver/$gcc_arc
 
 test -d $build_dir || mkdir -p $build_dir
