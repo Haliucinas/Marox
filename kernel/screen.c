@@ -96,17 +96,15 @@ static unsigned int scrollScreen(unsigned int offset) {
     }
 
     // copy each row to the row above it
-    unsigned int i = 1;
-    for (i = 1; i < VIDEO_ROWS; i++) {
-        memcpy(
-                (char*)(VIDEO_ADDR + screenOffset(i-1, 0)),
-                (char*)(VIDEO_ADDR + screenOffset(i, 0)),
+    for (unsigned int i = 1; i < VIDEO_ROWS; ++i) {
+        memcpy((char*)(VIDEO_ADDR + screenOffset(i-1, 0)),
+               (char*)(VIDEO_ADDR + screenOffset(i, 0)),
                 VIDEO_COLS * 2);
     }
 
     // zero out last line
     char* lastLine = (char*)(VIDEO_ADDR + screenOffset(VIDEO_ROWS - 1, 0));
-    for (i = 0; i < VIDEO_COLS * 2; i++) {
+    for (unsigned int i = 0; i < VIDEO_COLS * 2; ++i) {
         lastLine[i] = 0;
     }
 

@@ -133,16 +133,6 @@ keycode_t waitForKey(void) {
     return kc;
 }
 
-static unsigned int atoi(char* str) {
-    int res = 0;
- 
-    for (int i = 0; str[i] != '\0'; ++i) {
-        res = res*10 + str[i] - '0';
-    }
- 
-    return res;
-}
-
 int getLine(char* buff) {
     keycode_t kc;
     bool iFlag = begIntAtomic();

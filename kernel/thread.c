@@ -201,8 +201,7 @@ static void tlocalExit(thread_t* thread) {
     bool repeat = false;
     do {
         repeat = false;     // assume we don't need to repeat
-        int idx;
-        for (idx = 0; idx < MAX_TLOCAL_KEYS; idx++) {
+        for (int idx; idx < MAX_TLOCAL_KEYS; ++idx) {
             void* data = (void*)thread->tlocalData[idx];
             tlocal_destructor_t destructor = tlocalDestructors[idx];
 
@@ -230,8 +229,7 @@ static inline void pushDword(thread_t* thread, uint32_t value) {
 /*
  * Initialize members of a kernel thread
  */
-static void initThread(thread_t* thread, void* stackPage,
-        void* userStackPage, priority_t priority, bool detached) {
+static void initThread(thread_t* thread, void* stackPage, void* userStackPage, priority_t priority, bool detached) {
     static unsigned int next_free_id = 0;
 
     memset(thread, 0, sizeof(thread_t));
@@ -254,8 +252,7 @@ static void initThread(thread_t* thread, void* stackPage,
 
     threadQueueClear(&thread->joinQueue);
 
-    DEBUGF("new thread @ 0x%X, id: %d, esp: %X\n",
-            thread, thread->id, thread->esp, thread->userEsp);
+    DEBUGF("new thread @ 0x%X, id: %d, esp: %X\n", thread, thread->id, thread->esp, thread->userEsp);
 }
 
 /*

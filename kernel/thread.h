@@ -115,8 +115,7 @@ void wait(thread_queue_t* waitQueue);
 void makeRunnable(thread_t* thread);
 void makeRunnableAtomic(thread_t* thread);
 
-thread_t* spawnThread(thread_startFunc_t startFunction,
-        uint32_t arg, priority_t priority, bool detached, bool usermode);
+thread_t* spawnThread(thread_startFunc_t startFunction, uint32_t arg, priority_t priority, bool detached, bool usermode);
 
 void schedule(void);
 void schedulerInit();

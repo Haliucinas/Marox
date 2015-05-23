@@ -13,8 +13,7 @@ void memcpy(void *vdst, const void *vsrc, size_t n) {
     const unsigned char* src = vsrc;
     unsigned char* dst = vdst;
 
-    size_t i = 0;
-    for (i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; ++i) {
         *(dst + i) = *(src + i);
     }
 }

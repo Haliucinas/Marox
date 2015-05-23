@@ -37,22 +37,20 @@ void pagingInit(void) {
     KASSERT(pageDirectory);
     DEBUGF("page directory: 0x%x\n", virtToPhys(pageDirectory));
 
-    unsigned int pde = 0;
     /* set bits for all page directory entries */
-    for (pde = 0; pde < 1024; pde++) {
+    for (unsigned int pde = 0; pde < 1024; ++pde) {
         /* ((uintptr_t*)pageDirectory)[pde] = 0 | 2; /1* supervisor level, read/write, not present *1/ */
         ((uintptr_t*)pageDirectory)[pde] = 0 | 6;  /* usermode level, read/write, not present */
     }
 
     /* map first 16MB in 4 page tables */
     uintptr_t address = 0x0;
-    unsigned int pidx = 0;
-    for (pidx = KERNEL_VBASE >> 22; pidx < (KERNEL_VBASE >> 22) + 4; pidx++) {
+    for (unsigned int pidx = KERNEL_VBASE >> 22; pidx < (KERNEL_VBASE >> 22) + 4; ++pidx) {
         uintptr_t pageTable = (uintptr_t)allocPage();
         KASSERT(pageTable);
 
-        unsigned int pte;
-        for (pte = 0; pte < 1024; pte++) {
+        
+        for (unsigned int pte = 0; pte < 1024; ++pte) {
             /* ((uint32_t*)pageTable)[pte] = address | 3;  /1* supervisor level, read/write, present *1/ */
             ((uint32_t*)pageTable)[pte] = address | 7; /* usermode level, read/write, present */
             address += 0x1000;  /* next page address */

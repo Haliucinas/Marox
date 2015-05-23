@@ -28,7 +28,7 @@ uint32_t getTicks(void) {
  */
 void timerHandler(struct regs *r) {
     (void)r; // prevent 'unused' parameter warning
-    g_numTicks++;
+    ++g_numTicks;
 
     if (getCurrentThread() && getCurrentThread()->id == 5) {
         DEBUGF("%s\n", "timerHandler in user!");
@@ -55,6 +55,5 @@ void timerInit() {
 
 void delay(unsigned int ticks) {
     unsigned int eticks = g_numTicks + ticks;
-    while (g_numTicks < eticks)
-        ;
+    while (g_numTicks < eticks);
 }

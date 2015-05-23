@@ -113,8 +113,7 @@ static void markPageRange(uintptr_t start, uintptr_t end, uint32_t flags) {
     KASSERT(isPageAligned(end));
     KASSERT(start < end);
 
-    uintptr_t addr;
-    for (addr = start; addr < end; addr += PAGE_SIZE) {
+    for (uintptr_t addr = start; addr < end; addr += PAGE_SIZE) {
         page_t* page = pageFromAddress(addr);
         page->flags = flags;
 
@@ -239,8 +238,7 @@ void bssInit(void) {
 }
 
 void shmInit(void) {
-    int i;
-    for (i = 0; i < 100; ++i) {
+    for (int i = 0; i < 100; ++i) {
         sharedMemory[i].owner = 0;
         sharedMemory[i].buffer = (uintptr_t)bgetz(0x1000);
     }
@@ -255,7 +253,7 @@ int shmGet() {
         }
 
     	mutexLock(&shmLock);
-        i++;
+        ++i;
     	mutex_unlock(&shmLock);
     }
 }
@@ -321,8 +319,7 @@ void dumpmem(uintptr_t start, size_t bytes) {
     if (bytes > 256) bytes = 256;
     DEBUGF("Dump mem: 0x%x (%u bytes)\n", start, bytes);
     char *ptr = (char*)start;
-    unsigned int i;
-    for (i = 0; i < bytes / 16; i++) {
+    for (unsigned int i = 0; i < bytes / 16; ++i) {
         DEBUGF("%02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x\n",
                 *ptr++ & 0xFF, *ptr++ & 0xFF, *ptr++ & 0xFF, *ptr++ & 0xFF,
                 *ptr++ & 0xFF, *ptr++ & 0xFF, *ptr++ & 0xFF, *ptr++ & 0xFF,

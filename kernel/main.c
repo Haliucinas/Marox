@@ -157,8 +157,7 @@ static void printDate(uint32_t arg) {
         dateTime(&dt);
         kGetChar(&row, &col);
         kSetCursor(arg, 58);
-        kprintf("%02u:%02u:%02u %s %02u, %04u", dt.hour, dt.min, dt.sec,
-                monthName(dt.month), dt.mday, dt.year);
+        kprintf("%02u:%02u:%02u %s %02u, %04u", dt.hour, dt.min, dt.sec, monthName(dt.month), dt.mday, dt.year);
         kSetCursor(row, col);
         sleep(200);
     }
@@ -166,9 +165,8 @@ static void printDate(uint32_t arg) {
 
 void echoInput(uint32_t arg) {
     (void)arg;
-    unsigned int i = 0;
 
-    for (i = 0; i < arg; i++) {
+    for (unsigned int i = 0; i < arg; ++i) {
         keycode_t kc = waitForKey();
 
         if (kc == 'q') {
@@ -203,7 +201,7 @@ static void testUsermode(uint32_t arg) {
     syscall_shmRead(0, buff);
 
     syscall_print(buff);
-    for (int i = 0; i < arg; i++) {
+    for (int i = 0; i < arg; ++i) {
         char *dst = (char*)syscall_malloc(42);
         strcpy(dst, "hello");
 
